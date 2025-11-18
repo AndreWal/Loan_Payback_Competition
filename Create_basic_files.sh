@@ -43,8 +43,6 @@ mlartifacts/
 # --- OS / misc ---
 .DS_Store
 Thumbs.db
-local-dev.sh
-requirements.txt
 EOF
 
 
