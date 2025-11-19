@@ -24,8 +24,8 @@ def _(np, pd):
         data["education_level"] = data["education_level"].replace(mapping)
         data["ln_income"] = np.log(data["annual_income"])
         data["ln_debt"] = np.log(data["debt_to_income_ratio"])
-        cols = ["gender","marital_status","education_level","employment_status","loan_purpose"]
-        data = pd.get_dummies(data, columns=cols, drop_first=True)
+        cols = ["gender","marital_status","education_level","employment_status","loan_purpose","grade_subgrade"]
+        data = pd.get_dummies(data, columns=cols, drop_first=True, dtype=int)
         drop = ["annual_income","debt_to_income_ratio"]
         data.drop(columns=drop, inplace=True)
         return data

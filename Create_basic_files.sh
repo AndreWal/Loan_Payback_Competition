@@ -52,4 +52,5 @@ pandas
 optuna
 marimo
 matplotlib
+mlflow
 REQ
