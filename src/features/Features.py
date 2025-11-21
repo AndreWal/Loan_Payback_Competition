@@ -22,6 +22,8 @@ def _(np, pd):
     def transform(data) -> pd.DataFrame:
         mapping = {"Master's": "Master", "Bachelor's": "Bachelor"}
         data["education_level"] = data["education_level"].replace(mapping)
+        data["loan_sh"] = data["loan_amount"] / data["annual_income"] 
+        data["loan_int"] = data["loan_amount"] * data["interest_rate"]
         data["ln_income"] = np.log(data["annual_income"])
         data["ln_debt"] = np.log(data["debt_to_income_ratio"])
         cols = ["gender","marital_status","education_level","employment_status","loan_purpose","grade_subgrade"]
@@ -44,14 +46,18 @@ def _(load_data):
 @app.cell
 def _(train, transform):
     train_feat = transform(train)
-
-    train_feat.head()
     return (train_feat,)
 
 
 @app.cell
 def _(train_feat):
-    train_feat.to_csv("data/processed/Data_feature_training.csv")
+    train_feat.drop(columns=["id"], inplace=True)
+    return
+
+
+@app.cell
+def _(train_feat):
+    train_feat.to_csv("data/processed/Data_feature_training.csv", index=False)
     return
 
 
@@ -74,7 +80,7 @@ def _(test, transform):
 
 @app.cell
 def _(test_feat):
-    test_feat.to_csv("data/processed/Data_feature_test.csv")
+    test_feat.to_csv("data/processed/Data_feature_test.csv", index=False)
     return
 
 

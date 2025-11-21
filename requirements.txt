@@ -4,3 +4,4 @@ optuna
 marimo
 matplotlib
 mlflow
+catboost

@@ -53,4 +53,5 @@ optuna
 marimo
 matplotlib
 mlflow
+catboost
 REQ
