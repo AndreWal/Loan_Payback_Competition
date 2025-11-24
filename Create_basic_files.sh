@@ -15,7 +15,7 @@ __pycache__/
 # --- Virtual environments ---
 .venv/
 venv/
-env/
+.env/
 *.venv/
 
 # --- Jupyter / notebooks ---
