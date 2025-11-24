@@ -10,17 +10,10 @@ def _():
     import pandas as pd
     import mlflow
     import optuna
-    from catboost import CatBoostClassifier
+    from xgboost import XGBClassifier
     from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
     from sklearn.metrics import confusion_matrix, accuracy_score
-    return (
-        CatBoostClassifier,
-        StratifiedKFold,
-        cross_val_score,
-        mlflow,
-        optuna,
-        pd,
-    )
+    return StratifiedKFold, XGBClassifier, cross_val_score, mlflow, optuna, pd
 
 
 @app.cell
@@ -57,8 +50,8 @@ def _(train_y):
 
 @app.cell
 def _(
-    CatBoostClassifier,
     StratifiedKFold,
+    XGBClassifier,
     base_spw,
     cross_val_score,
     mlflow,
@@ -69,29 +62,38 @@ def _(
     def objective(trial):
         with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}") as child_run:
             params = {
-            "iterations": trial.suggest_int("iterations", 100, 2000),
-            "learning_rate": trial.suggest_float("learning_rate", 1e-4, 0.1, log=True),
-            "depth": trial.suggest_int("depth", 4, 10),
-            "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1e-3, 10.0, log=True),
-            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 50),
-            "random_strength": trial.suggest_float("random_strength", 0.0, 1.0),
-            "subsample": trial.suggest_float("subsample", 0.6, 1.0),
-            "rsm": trial.suggest_float("rsm", 0.6, 1.0),
-            "scale_pos_weight": trial.suggest_float("scale_pos_weight", 0.5 * base_spw, 2.0 * base_spw),
-            "od_type": "Iter",
-            "od_wait": 100,
-            "eval_metric": "AUC",         
-            "loss_function": "Logloss",
-                        }
+                    "n_estimators": trial.suggest_int("n_estimators", 100, 2000),
+                    "learning_rate": trial.suggest_float("learning_rate",
+                                                         1e-4, 0.1, log=True),
+                    "max_depth": trial.suggest_int("max_depth", 3, 12),
+                    "min_child_weight": trial.suggest_int("min_child_weight", 1, 50),
+                    "subsample": trial.suggest_float("subsample", 0.6, 1.0),
+                    "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
+                    "reg_alpha": trial.suggest_float("reg_alpha", 1e-5, 10.0, log=True),
+                    "reg_lambda": trial.suggest_float("reg_lambda", 1e-5, 10.0, log=True),
+
+                    # class imbalance
+                    "scale_pos_weight": trial.suggest_float(
+                        "scale_pos_weight",
+                        0.5 * base_spw,
+                        2.0 * base_spw,
+                    ),
+
+                    "objective": "binary:logistic",
+                    "eval_metric": "auc",
+                    "tree_method": "hist",
+                    "random_state": sdate,
+                    "n_jobs": -1,
+                }
 
             mlflow.log_params(params)
 
-            cat = CatBoostClassifier(**params, silent=True, thread_count=-1, random_seed = sdate)
+            xgb = XGBClassifier(**params)
 
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=sdate)
 
             scores = cross_val_score(
-                cat,
+                xgb,
                 train_x,
                 train_y,
                 cv=cv,
@@ -127,21 +129,19 @@ def _(mlflow, objective, optuna):
 
 
 @app.cell
-def _(sdate, study):
+def _(study):
     best_params = study.best_trial.params
-
-    best_params.update({"thread_count": -1, "random_seed": sdate})
 
     print(best_params)
     return (best_params,)
 
 
 @app.cell
-def _(CatBoostClassifier, best_params, train_x, train_y):
-    cat = CatBoostClassifier(**best_params, silent=True)
+def _(XGBClassifier, best_params, train_x, train_y):
+    xgb = XGBClassifier(**best_params)
 
-    cat.fit(train_x, train_y)
-    return (cat,)
+    xgb.fit(train_x, train_y)
+    return
 
 
 @app.cell
@@ -157,7 +157,7 @@ def _(cat, pd):
 
     submission = pd.DataFrame({"id": ids, "loan_paid_back": probs})
 
-    submission.to_csv("data/processed/Cat_submission_complete_add.csv", index=False)
+    submission.to_csv("data/processed/Xgb_submission_complete_add.csv", index=False)
     return
 
 

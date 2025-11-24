@@ -54,4 +54,5 @@ marimo
 matplotlib
 mlflow
 catboost
+xgboost
 REQ

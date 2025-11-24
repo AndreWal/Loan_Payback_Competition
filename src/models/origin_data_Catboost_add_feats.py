@@ -31,13 +31,16 @@ def _(mlflow):
 
 @app.cell
 def _(pd):
-    fold = "data/processed/Data_feature_training_add.csv"
+    fold = "data/processed/Data_feature_origin_data.csv"
     startdat = pd.read_csv(fold)
+
+    tardat = "data/processed/Data_feature_test_add.csv"
+    targetdat = pd.read_csv(tardat)
 
     sdate = 20112025
 
-    startdat.head()
-    return sdate, startdat
+    startdat.shape
+    return sdate, startdat, targetdat
 
 
 @app.cell
@@ -145,10 +148,7 @@ def _(CatBoostClassifier, best_params, train_x, train_y):
 
 
 @app.cell
-def _(cat, pd):
-    tardat = "data/processed/Data_feature_test_add.csv"
-    targetdat = pd.read_csv(tardat)
-
+def _(cat, pd, targetdat):
     ids = targetdat["id"].copy()
 
     X_test = targetdat.drop(columns=["id"])
@@ -157,7 +157,7 @@ def _(cat, pd):
 
     submission = pd.DataFrame({"id": ids, "loan_paid_back": probs})
 
-    submission.to_csv("data/processed/Cat_submission_complete_add.csv", index=False)
+    submission.to_csv("data/processed/Cat_submission_origin_add.csv", index=False)
     return
 
 

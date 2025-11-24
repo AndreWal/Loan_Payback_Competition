@@ -5,3 +5,4 @@ marimo
 matplotlib
 mlflow
 catboost
+xgboost

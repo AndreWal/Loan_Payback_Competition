@@ -10,11 +10,11 @@ def _():
     import pandas as pd
     import mlflow
     import optuna
-    from catboost import CatBoostClassifier
+    from sklearn.ensemble import RandomForestClassifier
     from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
     from sklearn.metrics import confusion_matrix, accuracy_score
     return (
-        CatBoostClassifier,
+        RandomForestClassifier,
         StratifiedKFold,
         cross_val_score,
         mlflow,
@@ -52,14 +52,13 @@ def _(train_y):
     pos_frac = train_y.mean()
     neg_frac = 1 - pos_frac
     base_spw = neg_frac / pos_frac
-    return (base_spw,)
+    return
 
 
 @app.cell
 def _(
-    CatBoostClassifier,
+    RandomForestClassifier,
     StratifiedKFold,
-    base_spw,
     cross_val_score,
     mlflow,
     sdate,
@@ -69,29 +68,30 @@ def _(
     def objective(trial):
         with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}") as child_run:
             params = {
-            "iterations": trial.suggest_int("iterations", 100, 2000),
-            "learning_rate": trial.suggest_float("learning_rate", 1e-4, 0.1, log=True),
-            "depth": trial.suggest_int("depth", 4, 10),
-            "l2_leaf_reg": trial.suggest_float("l2_leaf_reg", 1e-3, 10.0, log=True),
-            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 1, 50),
-            "random_strength": trial.suggest_float("random_strength", 0.0, 1.0),
-            "subsample": trial.suggest_float("subsample", 0.6, 1.0),
-            "rsm": trial.suggest_float("rsm", 0.6, 1.0),
-            "scale_pos_weight": trial.suggest_float("scale_pos_weight", 0.5 * base_spw, 2.0 * base_spw),
-            "od_type": "Iter",
-            "od_wait": 100,
-            "eval_metric": "AUC",         
-            "loss_function": "Logloss",
-                        }
+                    "n_estimators": trial.suggest_int("n_estimators", 200, 800, step=100),
+                    "max_depth": trial.suggest_categorical("max_depth", [None, 8, 16, 32]),
+                    "max_features": trial.suggest_categorical(
+                        "max_features", ["sqrt", 0.3, 0.5, 0.7]
+                    ),
+                    "min_samples_split": trial.suggest_int("min_samples_split", 2, 20),
+                    "min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 20),
+                    "max_leaf_nodes": trial.suggest_categorical(
+                        "max_leaf_nodes", [None, 64, 128, 256]
+                    ),
+                    "bootstrap": trial.suggest_categorical("bootstrap", [True, False]),
+                    "class_weight": trial.suggest_categorical(
+                        "class_weight", [None, "balanced"]
+                    ),
+                }
 
             mlflow.log_params(params)
 
-            cat = CatBoostClassifier(**params, silent=True, thread_count=-1, random_seed = sdate)
+            rfc = RandomForestClassifier(**params, n_jobs=-1, random_state=sdate)
 
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=sdate)
 
             scores = cross_val_score(
-                cat,
+                rfc,
                 train_x,
                 train_y,
                 cv=cv,
@@ -133,15 +133,15 @@ def _(sdate, study):
     best_params.update({"thread_count": -1, "random_seed": sdate})
 
     print(best_params)
-    return (best_params,)
+    return
 
 
 @app.cell
-def _(CatBoostClassifier, best_params, train_x, train_y):
-    cat = CatBoostClassifier(**best_params, silent=True)
+def _(RandomForestClassifier, params, sdate, train_x, train_y):
+    rfc = RandomForestClassifier(**params, n_jobs=-1, random_state=sdate)
 
-    cat.fit(train_x, train_y)
-    return (cat,)
+    rfc.fit(train_x, train_y)
+    return
 
 
 @app.cell
