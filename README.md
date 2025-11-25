@@ -17,7 +17,7 @@ The task is to predict whether a borrower will successfully repay a loan using a
 |---------|------------------|
 | Language | Python |
 | Experiments | Marimo notebooks |
-| Models | CatBoost, XGBoost, Random Forest |
+| Models | CatBoost, XGBoost, LGBM, Random Forest |
 | Hyperparameter Tuning | Optuna |
 | Tracking | MLflow |
 | Reproducibility | Docker, shell scripts |
