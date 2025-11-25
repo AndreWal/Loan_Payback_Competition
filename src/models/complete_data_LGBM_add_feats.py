@@ -10,10 +10,10 @@ def _():
     import pandas as pd
     import mlflow
     import optuna
-    from xgboost import XGBClassifier
+    from lightgbm import LGBMClassifier
     from sklearn.model_selection import cross_val_score, train_test_split, StratifiedKFold
     from sklearn.metrics import confusion_matrix, accuracy_score
-    return StratifiedKFold, XGBClassifier, cross_val_score, mlflow, optuna, pd
+    return LGBMClassifier, StratifiedKFold, cross_val_score, mlflow, optuna, pd
 
 
 @app.cell
@@ -50,8 +50,8 @@ def _(train_y):
 
 @app.cell
 def _(
+    LGBMClassifier,
     StratifiedKFold,
-    XGBClassifier,
     base_spw,
     cross_val_score,
     mlflow,
@@ -62,38 +62,36 @@ def _(
     def objective(trial):
         with mlflow.start_run(nested=True, run_name=f"trial_{trial.number}") as child_run:
             params = {
-                    "n_estimators": trial.suggest_int("n_estimators", 100, 2000),
-                    "learning_rate": trial.suggest_float("learning_rate",
-                                                         1e-4, 0.1, log=True),
-                    "max_depth": trial.suggest_int("max_depth", 3, 12),
-                    "min_child_weight": trial.suggest_int("min_child_weight", 1, 50),
-                    "subsample": trial.suggest_float("subsample", 0.6, 1.0),
-                    "colsample_bytree": trial.suggest_float("colsample_bytree", 0.6, 1.0),
-                    "reg_alpha": trial.suggest_float("reg_alpha", 1e-5, 10.0, log=True),
-                    "reg_lambda": trial.suggest_float("reg_lambda", 1e-5, 10.0, log=True),
-
-                    # class imbalance
-                    "scale_pos_weight": trial.suggest_float(
-                        "scale_pos_weight",
-                        0.5 * base_spw,
-                        2.0 * base_spw,
-                    ),
-
-                    "objective": "binary:logistic",
-                    "eval_metric": "auc",
-                    "tree_method": "hist",
-                    "random_state": sdate,
-                    "n_jobs": -1,
-                }
+        "n_estimators": trial.suggest_int("n_estimators", 200, 1500),
+        "learning_rate": trial.suggest_float("learning_rate", 0.05, 0.2, log=True),
+        "max_depth": trial.suggest_int("max_depth", -1, 12),
+        "num_leaves": trial.suggest_int("num_leaves", 16, 256),
+        "min_child_samples": trial.suggest_int("min_child_samples", 10, 60),
+        "min_split_gain": trial.suggest_float("min_split_gain", 0.0, 0.5),
+        "subsample": trial.suggest_float("subsample", 0.7, 1.0),
+        "subsample_freq": trial.suggest_int("subsample_freq", 1, 5),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.7, 1.0),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-5, 1.0, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-5, 5.0, log=True),
+        "scale_pos_weight": trial.suggest_float(
+            "scale_pos_weight",
+            0.5 * base_spw,
+            2.0 * base_spw,
+        ),
+        "objective": "binary",
+        "boosting_type": "gbdt",
+        "random_state": sdate,
+        "n_jobs": -1,
+    }
 
             mlflow.log_params(params)
 
-            xgb = XGBClassifier(**params)
+            lgbm = LGBMClassifier(**params)
 
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=sdate)
 
             scores = cross_val_score(
-                xgb,
+                lgbm,
                 train_x,
                 train_y,
                 cv=cv,
@@ -137,15 +135,15 @@ def _(study):
 
 
 @app.cell
-def _(XGBClassifier, best_params, train_x, train_y):
-    xgb = XGBClassifier(**best_params)
+def _(LGBMClassifier, best_params, train_x, train_y):
+    lgbm = LGBMClassifier(**best_params)
 
-    xgb.fit(train_x, train_y)
-    return (xgb,)
+    lgbm.fit(train_x, train_y)
+    return (lgbm,)
 
 
 @app.cell
-def _(pd, xgb):
+def _(lgbm, pd):
     tardat = "data/processed/Data_feature_test_add.csv"
     targetdat = pd.read_csv(tardat)
 
@@ -153,11 +151,11 @@ def _(pd, xgb):
 
     X_test = targetdat.drop(columns=["id"])
 
-    probs = xgb.predict_proba(X_test)[:, 1]
+    probs = lgbm.predict_proba(X_test)[:, 1]
 
     submission = pd.DataFrame({"id": ids, "loan_paid_back": probs})
 
-    submission.to_csv("data/processed/Xgb_submission_complete_add.csv", index=False)
+    submission.to_csv("data/processed/LGBM_submission_complete_add.csv", index=False)
     return
 
 

@@ -6,3 +6,4 @@ matplotlib
 mlflow
 catboost
 xgboost
+lightgbm

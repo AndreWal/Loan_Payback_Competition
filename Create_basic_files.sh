@@ -41,6 +41,7 @@ mlartifacts/
 *.code-workspace
 
 # --- OS / misc ---
+catboost_info/
 .DS_Store
 Thumbs.db
 EOF
@@ -55,4 +56,5 @@ matplotlib
 mlflow
 catboost
 xgboost
+lightgbm
 REQ

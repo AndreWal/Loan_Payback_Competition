@@ -8,7 +8,7 @@ __pycache__/
 # --- Virtual environments ---
 .venv/
 venv/
-env/
+.env/
 *.venv/
 
 # --- Jupyter / notebooks ---
@@ -34,5 +34,6 @@ mlartifacts/
 *.code-workspace
 
 # --- OS / misc ---
+catboost_info/
 .DS_Store
 Thumbs.db
