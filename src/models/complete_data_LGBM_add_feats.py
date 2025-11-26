@@ -24,7 +24,7 @@ def _(mlflow):
 
 @app.cell
 def _(pd):
-    fold = "data/processed/Data_feature_training_add.csv"
+    fold = "data/processed/Data_feature_origin_data.csv"
     startdat = pd.read_csv(fold)
 
     sdate = 20112025
@@ -64,10 +64,10 @@ def _(
             params = {
         "n_estimators": trial.suggest_int("n_estimators", 200, 1500),
         "learning_rate": trial.suggest_float("learning_rate", 0.05, 0.2, log=True),
-        "max_depth": trial.suggest_int("max_depth", -1, 12),
+        "max_depth": trial.suggest_int("max_depth", -1, 16),
         "num_leaves": trial.suggest_int("num_leaves", 16, 256),
-        "min_child_samples": trial.suggest_int("min_child_samples", 10, 60),
-        "min_split_gain": trial.suggest_float("min_split_gain", 0.0, 0.5),
+        "min_child_samples": trial.suggest_int("min_child_samples", 5, 40),
+        "min_split_gain": trial.suggest_float("min_split_gain", 0.0, 0.1),
         "subsample": trial.suggest_float("subsample", 0.7, 1.0),
         "subsample_freq": trial.suggest_int("subsample_freq", 1, 5),
         "colsample_bytree": trial.suggest_float("colsample_bytree", 0.7, 1.0),

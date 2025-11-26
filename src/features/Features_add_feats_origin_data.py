@@ -23,7 +23,6 @@ def _(np, pd):
         mapping = {"Master's": "Master", "Bachelor's": "Bachelor"}
         data["education_level"] = data["education_level"].replace(mapping)
         data["loan_sh"] = data["loan_amount"] / data["annual_income"] 
-        data["loan_int"] = data["loan_amount"] * data["interest_rate"]
         data["ln_income"] = np.log(data["annual_income"])
         data["ln_debt"] = np.log(data["debt_to_income_ratio"])
         rate_dec = data["interest_rate"] / 100.0

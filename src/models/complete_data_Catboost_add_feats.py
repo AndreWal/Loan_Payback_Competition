@@ -31,7 +31,7 @@ def _(mlflow):
 
 @app.cell
 def _(pd):
-    fold = "data/processed/Data_feature_training_add.csv"
+    fold = "data/processed/Data_feature_origin_data.csv"
     startdat = pd.read_csv(fold)
 
     sdate = 20112025
@@ -157,7 +157,7 @@ def _(cat, pd):
 
     submission = pd.DataFrame({"id": ids, "loan_paid_back": probs})
 
-    submission.to_csv("data/processed/Cat_submission_complete_add.csv", index=False)
+    submission.to_csv("data/processed/Cat_submission_complete_add_II.csv", index=False)
     return
 
 
