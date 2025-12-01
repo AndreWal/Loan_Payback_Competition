@@ -16,7 +16,8 @@ venv/
 *.ipynb_snapshots/
 
 # --- Data (Kaggle datasets, features, predictions, etc.) ---
-data/
+data/raw/
+data/processed/
 
 # --- Logs / temporary files ---
 *.log
