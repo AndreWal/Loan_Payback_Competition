@@ -1,7 +1,6 @@
 # 🏦 Loan Payback Competition
 
-This repository contains the code, experiments, and infrastructure for the **Kaggle Playground Series – Season 5, Episode 11** competition.  
-The task is to predict whether a borrower will successfully repay a loan using a realistic, synthetic binary-classification dataset.
+This repository contains the code, experiments, and infrastructure for the **Kaggle Playground Series – Season 5, Episode 11** competition. The task is to predict whether a borrower will successfully repay a loan using a realistic, synthetic binary-classification dataset.
 
 ---
 
@@ -24,7 +23,7 @@ The task is to predict whether a borrower will successfully repay a loan using a
 
 ## 🎯 Results  
 
-The target metric was the area under the ROC curve. Below are histograms of the leaderboard scores. The left plot shows all scores whereas the right plot zooms in by just displaying scores above 0.9:
+The target metric was the area under the **ROC curve**. Below are histograms of the leaderboard scores. The left plot shows all scores whereas the right plot zooms in by just displaying scores above 0.9:
 
 | All Leaderboard Scores | Scores above 0.9 |
 |---------------------|----------------------|
