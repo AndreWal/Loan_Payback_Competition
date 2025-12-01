@@ -9,6 +9,7 @@ dirs=(
   "Docker"
   "data/raw"
   "data/processed"
+  "data/plots"
   "notebooks/exploratory"
   "notebooks/modelling"
   "src/data"
