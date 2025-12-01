@@ -22,7 +22,7 @@ The task is to predict whether a borrower will successfully repay a loan using a
 | Tracking | MLflow |
 | Reproducibility | Docker, shell scripts |
 
-## Results  
+## 🎯 Results  
 
 The target metric was the area under the ROC curve. Below are histograms of the leaderboard scores. The left plot shows all scores whereas the right plot zooms in by just displaying scores above 0.9:
 
